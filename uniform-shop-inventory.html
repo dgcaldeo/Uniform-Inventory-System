@@ -342,9 +342,6 @@
   }
 
   // ---------- PLANOGRAM ALGORITHM ----------
-  // All items have unit weight 1 (1 piece = 1 shelf slot), so greedy-by-value and
-  // bounded-knapsack DP produce the same optimal result here — this function
-  // mirrors the DP allocation described in the methodology.
   function computeAllocation(){
     var avail = {}; order.forEach(function(k){ avail[k]=skus[k].stock; });
     var alloc = {}; var remaining = CAPACITY;
