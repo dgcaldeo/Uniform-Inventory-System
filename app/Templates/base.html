@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Uniform Shop{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <strong class="brand">Uniform Shop</strong>
+  <nav class="tabbar">
+    {% for ep, label in [('dashboard.index','Dashboard'),('inventory.stockroom','Delivery / Stockroom'),('inventory.items','Items & Pricing'),('planogram.index','Planogram'),('pos.index','POS / Checkout'),('reports.index','Sales Reports')] %}
+    <a class="tabbtn {{ 'active' if request.endpoint == ep }}" href="{{ url_for(ep) }}">{{ label }}</a>
+    {% endfor %}
+  </nav>
+</header>
+<main class="wf-main">
+  {% for category, message in get_flashed_messages(with_categories=true) %}
+  <div class="wf-alert {{ category }}">{{ message }}</div>
+  {% endfor %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Items & Pricing</h1><p class="sub">Add items, change prices, and set the tax rate. Price changes apply to future sales only.</p>
+<div class="panel">
+  <form class="form" method="post" action="{{ url_for('inventory.settings') }}">
+    <div><label>Tax rate (%) added to each sale</label><input type="number" name="tax_rate" step="0.01" min="0" max="100" value="{{ tax_rate }}"></div>
+    <div><label>Low-stock threshold (pcs on shelf)</label><input type="number" name="threshold" min="0" value="{{ threshold }}"></div>
+    <button class="btn solid">Save settings</button>
+  </form>
+</div>
+<h2>Add a new item</h2>
+<div class="panel">
+  <form class="form" method="post" action="{{ url_for('inventory.add_item') }}">
+    <div><label>Section</label><select name="section_id">{% for s in sections %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}</select></div>
+    <div><label>or new section name</label><input name="new_section" placeholder="e.g. Necktie"></div>
+    <div><label>Capacity (new section)</label><input type="number" name="capacity" value="50" min="1"></div>
+    <div><label>Size</label><input name="size" required style="width:80px"></div>
+    <div><label>Price (₱)</label><input type="number" name="price" step="0.01" min="0" required></div>
+    <div><label>Min on shelf</label><input type="number" name="min_qty" value="5" min="0"></div>
+    <div><label>Max on shelf</label><input type="number" name="max_qty" value="25" min="1"></div>
+    <div><label>Stockroom qty</label><input type="number" name="stockroom_qty" value="0" min="0"></div>
+    <button class="btn solid">Add item</button>
+  </form>
+</div>
+<h2>Edit prices and shelf limits</h2>
+<div class="tablewrap"><table>
+  <tr><th>Item</th><th>Price (₱)</th><th>Min</th><th>Max</th><th></th></tr>
+  {% for s in sections %}{% for i in s.items %}
+  <tr><td>{{ i.name }}<form id="f{{ i.id }}" method="post" action="{{ url_for('inventory.edit_item', item_id=i.id) }}"></form></td>
+    <td><input form="f{{ i.id }}" type="number" name="price" step="0.01" min="0" value="{{ i.price }}"></td>
+    <td><input form="f{{ i.id }}" type="number" name="min_qty" min="0" value="{{ i.min_qty }}"></td>
+    <td><input form="f{{ i.id }}" type="number" name="max_qty" min="1" value="{{ i.max_qty }}"></td>
+    <td><button form="f{{ i.id }}" class="btn">Save</button></td></tr>
+  {% endfor %}{% endfor %}
+</table></div>
+{% endblock %}

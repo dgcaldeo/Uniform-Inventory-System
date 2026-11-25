@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Dashboard</h1><p class="sub">Today at a glance</p>
+<div class="row">
+  <div class="card"><div class="label">Transactions today</div><div class="val">{{ txn_count }}</div></div>
+  <div class="card"><div class="label">Revenue today (incl. tax)</div><div class="val">{{ revenue|peso }}</div></div>
+  <div class="card"><div class="label">Low-stock items</div><div class="val">{{ low|length }}</div></div>
+</div>
+<h2>Low-stock notifications</h2>
+{% for item in low %}
+<div class="wf-alert">{{ item.name }}: {{ item.shelf_qty }} pcs left on the shelf.
+  <a href="{{ url_for('planogram.index', section=item.section_id) }}">Open planogram</a></div>
+{% else %}
+<div class="wf-alert success">All items are above the low-stock threshold.</div>
+{% endfor %}
+{% endblock %}

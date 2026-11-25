@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Sales Reports</h1><p class="sub">{{ label }}</p>
+<div class="panel">
+  <form class="form" method="get">
+    <div><label>Period</label><select name="period"><option value="daily" {{ 'selected' if period == 'daily' }}>Daily</option><option value="weekly" {{ 'selected' if period == 'weekly' }}>Weekly (Mon–Sun)</option></select></div>
+    <div><label>Date</label><input type="date" name="date" value="{{ date }}"></div>
+    <button class="btn solid">Show report</button>
+    <a class="btn" href="{{ url_for('reports.pdf', period=period, date=date) }}">Export PDF</a>
+  </form>
+</div>
+<div class="row">
+  <div class="card"><div class="label">Transactions</div><div class="val">{{ txns }}</div></div>
+  <div class="card"><div class="label">Total tax</div><div class="val">{{ total_tax|peso }}</div></div>
+  <div class="card"><div class="label">Total amount (incl. tax)</div><div class="val">{{ total_amount|peso }}</div></div>
+</div>
+<div class="tablewrap"><table>
+  <tr><th>Date / time</th><th>Student</th><th>Item ordered</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Tax</th><th class="num">Total</th><th></th></tr>
+  {% for sale, i in rows %}
+  <tr><td>{{ sale.created_at.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ sale.student_name }}</td><td>{{ i.item_name }}</td>
+    <td class="num">{{ i.qty }}</td><td class="num">{{ i.unit_price|peso }}</td><td class="num">{{ i.tax_amount|peso }}</td><td class="num">{{ i.line_total|peso }}</td>
+    <td><a href="{{ url_for('pos.receipt', sale_id=sale.id) }}">Receipt</a></td></tr>
+  {% else %}<tr><td colspan="8">No sales in this period.</td></tr>{% endfor %}
+  <tfoot><tr><td colspan="5" class="num">Totals</td><td class="num">{{ total_tax|peso }}</td><td class="num">{{ total_amount|peso }}</td><td></td></tr></tfoot>
+</table></div>
+{% endblock %}

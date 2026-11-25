@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Receipt #{{ '%06d'|format(sale.id) }}{% endblock %}
+{% block content %}
+<div class="receipt">
+  <h1>Uniform Shop</h1>
+  <div class="c">Receipt #{{ '%06d'|format(sale.id) }}<br>{{ sale.created_at.strftime('%B %d, %Y %I:%M %p') }}<br>Student: {{ sale.student_name }}</div>
+  <table style="margin-top:12px">
+    <tr><th>Item</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Total</th></tr>
+    {% for i in sale.items %}
+    <tr><td>{{ i.item_name }}</td><td class="num">{{ i.qty }}</td><td class="num">{{ i.unit_price|peso }}</td><td class="num">{{ (i.line_total - i.tax_amount)|peso }}</td></tr>
+    {% endfor %}
+  </table>
+  <div class="sumline"><span>Subtotal</span><span>{{ sale.subtotal|peso }}</span></div>
+  <div class="sumline"><span>Tax ({{ sale.tax_rate }}%)</span><span>{{ sale.tax_total|peso }}</span></div>
+  <div class="sumline big"><span>Total</span><span>{{ sale.total|peso }}</span></div>
+  <p class="c">Thank you!</p>
+</div>
+<p class="no-print" style="text-align:center;margin-top:16px">
+  <button class="btn solid" onclick="window.print()">Print receipt</button>
+  <a class="btn" href="{{ url_for('pos.index') }}">New sale</a></p>
+{% endblock %}

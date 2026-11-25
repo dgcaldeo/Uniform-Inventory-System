@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Delivery & Stockroom</h1><p class="sub">Record deliveries into the stockroom. Restocking moves them to the shelf.</p>
+<div class="panel">
+  <form class="form" method="post" action="{{ url_for('inventory.delivery') }}">
+    <div><label>Item</label>
+      <select name="item_id" required>{% for i in items %}<option value="{{ i.id }}">{{ i.name }}</option>{% endfor %}</select></div>
+    <div><label>Quantity received</label><input type="number" name="qty" min="1" required></div>
+    <button class="btn solid">Add to stockroom</button>
+  </form>
+</div>
+{% for s in sections %}
+<h2>{{ s.name }} (shelf {{ s.shelf_total }} / {{ s.capacity }})</h2>
+<div class="tablewrap"><table>
+  <tr><th>Size</th><th>Stockroom</th><th>Shelf</th><th>Status</th></tr>
+  {% for i in s.items %}
+  <tr><td>{{ i.size }}</td><td>{{ i.stockroom_qty }}</td><td>{{ i.shelf_qty }}</td>
+    <td><span class="tag {{ 'low' if i.low }}">{{ 'LOW' if i.low else 'OK' }}</span></td></tr>
+  {% endfor %}
+</table></div>
+{% endfor %}
+<h2>Recent deliveries</h2>
+{% for d in deliveries %}<div class="cartrow"><span>{{ d.item.name }}</span><span>+{{ d.qty }} · {{ d.created_at.strftime('%b %d %H:%M') }}</span></div>
+{% else %}<p class="sub">No deliveries recorded yet.</p>{% endfor %}
+{% endblock %}

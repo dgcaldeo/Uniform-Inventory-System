@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>POS / Checkout</h1><p class="sub">Tap an item to add it. Sales deduct from the shelf.</p>
+<div class="pos">
+  <div class="left">
+    {% for s in sections %}<h2>{{ s.name }}</h2>
+    <div class="grid">{% for i in s.items %}
+      <form method="post" action="{{ url_for('pos.add', item_id=i.id) }}">
+        <button {{ 'disabled' if in_cart.get(i.id|string, 0) >= i.shelf_qty }}><b>{{ i.size }}</b><br>{{ i.price|peso }}<br>Shelf: {{ i.shelf_qty }}</button>
+      </form>{% endfor %}</div>
+    {% endfor %}
+  </div>
+  <div class="right panel">
+    <h2 style="margin-top:0">Current order</h2>
+    {% for l in cart.lines %}
+    <div class="cartrow"><span>{{ l.item.name }} ×{{ l.qty }}</span>
+      <span>{{ l.subtotal|peso }}
+        <form method="post" action="{{ url_for('pos.remove', item_id=l.item.id) }}"><button class="link">remove 1</button></form></span></div>
+    {% else %}<p class="sub">The cart is empty. Tap an item to add it.</p>{% endfor %}
+    <div class="sumline"><span>Subtotal</span><span>{{ cart.subtotal|peso }}</span></div>
+    <div class="sumline"><span>Tax ({{ cart.rate }}%)</span><span>{{ cart.tax|peso }}</span></div>
+    <div class="sumline big"><span>Total</span><span>{{ cart.total|peso }}</span></div>
+    <form method="post" action="{{ url_for('pos.checkout') }}" style="margin-top:12px">
+      <label>Student name</label><input name="student_name" required style="width:100%;margin-bottom:10px">
+      <button class="btn solid" style="width:100%" {{ 'disabled' if not cart.lines }}>Complete sale and print receipt</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% macro bar(section, plan) %}
+<div class="shelf">
+  {% for i in section.items %}{% set q = plan.target[i.id|string] if plan else i.shelf_qty %}
+  <div class="slot" style="flex:{{ [q, 0.0001]|max }}"><b>{{ i.size }}</b>{{ q }} pcs</div>
+  {% endfor %}
+</div>
+{% endmacro %}
+{% block content %}
+<h1>Planogram</h1><p class="sub">Pick a section, generate the best layout, restock the shelf, then confirm.</p>
+{% if section %}
+<div class="panel"><div class="form">
+  <form method="get"><label>Section</label>
+    <select name="section" onchange="this.form.submit()">{% for s in sections %}<option value="{{ s.id }}" {{ 'selected' if s.id == section.id }}>{{ s.name }}</option>{% endfor %}</select></form>
+  <form class="form" method="post" action="{{ url_for('planogram.capacity') }}">
+    <input type="hidden" name="section_id" value="{{ section.id }}">
+    <div><label>Shelf capacity (pcs)</label><input type="number" name="capacity" min="1" value="{{ section.capacity }}"></div>
+    <button class="btn">Save capacity</button>
+  </form>
+  <form method="post" action="{{ url_for('planogram.generate') }}">
+    <input type="hidden" name="section_id" value="{{ section.id }}"><button class="btn solid">Generate planogram</button></form>
+</div></div>
+{% for i in section.items if i.low %}<div class="wf-alert">{{ i.size }} is low: {{ i.shelf_qty }} pcs on the shelf.</div>{% endfor %}
+<h2>Current shelf</h2>{{ bar(section, none) }}
+<div class="cap">{{ section.shelf_total }} / {{ section.capacity }} pcs on the shelf</div>
+{% if plan %}
+<h2>Recommended layout</h2>{{ bar(section, plan) }}
+<div class="cap">Target: {{ plan.target.values()|sum }} / {{ section.capacity }} pcs</div>
+<div class="tablewrap"><table>
+  <tr><th>Size</th><th>On shelf</th><th>Target</th><th>Move from stockroom</th><th>Stockroom</th></tr>
+  {% for i in section.items %}{% set t = plan.target[i.id|string] %}
+  <tr><td>{{ i.size }}</td><td>{{ i.shelf_qty }}</td><td>{{ t }}</td><td>{{ [t - i.shelf_qty, 0]|max }}</td><td>{{ i.stockroom_qty }}</td></tr>
+  {% endfor %}
+</table></div>
+<h2>Algorithm comparison (total sales-score value)</h2>
+<div class="row">
+  <div class="card"><div class="label">DP knapsack</div><div class="val">{{ plan.totals.dp }}</div></div>
+  <div class="card"><div class="label">Greedy</div><div class="val">{{ plan.totals.greedy }}</div></div>
+  <div class="card"><div class="label">Equal split (manual)</div><div class="val">{{ plan.totals.equal }}</div></div>
+  <div class="card"><div class="label">DP vs equal split</div><div class="val">{{ ((plan.totals.dp - plan.totals.equal) / plan.totals.equal * 100)|round(1) if plan.totals.equal else 0 }}%</div></div>
+</div>
+<form method="post" action="{{ url_for('planogram.confirm') }}">
+  <input type="hidden" name="section_id" value="{{ section.id }}">
+  <button class="btn solid">Confirm restock done</button>
+</form>
+{% endif %}
+{% else %}<p class="sub">No sections yet. Add an item on the Items & Pricing tab.</p>{% endif %}
+{% endblock %}
